@@ -33,10 +33,9 @@ func SearchPuzzle(input, word string) int {
 	for x, p := range puzzle {
 		puzzle[x] = strings.TrimSpace(p)
 	}
-	maxH, maxV := len(puzzle[0]), len(puzzle)
 	count := 0
-	for rowIndex := 0; rowIndex < maxV; rowIndex++ {
-		for colIndex := 0; colIndex < maxH; colIndex++ {
+	for rowIndex := 0; rowIndex < len(puzzle); rowIndex++ {
+		for colIndex := 0; colIndex < len(puzzle[0]); colIndex++ {
 			count += FindWordAt(puzzle, word, rowIndex, colIndex)
 		}
 	}
@@ -48,34 +47,14 @@ func SearchPuzzleV2(input string) int {
 	for x, p := range puzzle {
 		puzzle[x] = strings.TrimSpace(p)
 	}
-	maxH, maxV := len(puzzle[0]), len(puzzle)
 	count := 0
-	for rowIndex := 0; rowIndex < maxV; rowIndex++ {
-		for colIndex := 0; colIndex < maxH; colIndex++ {
+	for rowIndex := 1; rowIndex < len(puzzle)-1; rowIndex++ {
+		for colIndex := 1; colIndex < len(puzzle[0])-1; colIndex++ {
 			// Search diagonaly for MAS or SAM
 			if puzzle[rowIndex][colIndex] == 'A' {
-				tlr, tlc := rowIndex-1, colIndex-1
-				if !(tlr >= 0 && tlr < maxV) || !(tlc >= 0 && tlc < maxH) {
-					continue
-				}
-				trr, trc := rowIndex-1, colIndex+1
-				if !(trr >= 0 && trr < maxV) || !(trc >= 0 && trc < maxH) {
-					continue
-				}
-				brr, brc := rowIndex+1, colIndex+1
-				if !(brr >= 0 && brr < maxV) || !(brc >= 0 && brc < maxH) {
-					continue
-				}
-				blr, blc := rowIndex+1, colIndex-1
-				if !(blr >= 0 && blr < maxV) || !(blc >= 0 && blc < maxH) {
-					continue
-				}
-
 				// Now that the moves are in bound, see if we can find the word
-				if (puzzle[tlr][tlc] == 'M' && puzzle[brr][brc] == 'S') || (puzzle[tlr][tlc] == 'S' && puzzle[brr][brc] == 'M') {
-					if (puzzle[trr][trc] == 'S' && puzzle[blr][blc] == 'M') || (puzzle[trr][trc] == 'M' && puzzle[blr][blc] == 'S') {
-						count++
-					}
+				if ((puzzle[rowIndex-1][colIndex-1] == 'M' && puzzle[rowIndex+1][colIndex+1] == 'S') || (puzzle[rowIndex-1][colIndex-1] == 'S' && puzzle[rowIndex+1][colIndex+1] == 'M')) && ((puzzle[rowIndex-1][colIndex+1] == 'S' && puzzle[rowIndex+1][colIndex-1] == 'M') || (puzzle[rowIndex-1][colIndex+1] == 'M' && puzzle[rowIndex+1][colIndex-1] == 'S')) {
+					count++
 				}
 			}
 		}
@@ -84,7 +63,6 @@ func SearchPuzzleV2(input string) int {
 }
 
 func FindWordAt(puzzle []string, word string, begCi, begRi int) int {
-	maxH, maxV := len(puzzle[0]), len(puzzle)
 	count := 0
 	// Check if moving in a direction is within bound
 	for _, dir := range Directions {
@@ -92,7 +70,7 @@ func FindWordAt(puzzle []string, word string, begCi, begRi int) int {
 		c, r := begCi, begRi
 		for i := 0; i < len(word); i++ {
 			// If the move is within bounds
-			if (c >= 0 && c < maxV) && (r >= 0 && r < maxH) {
+			if (c >= 0 && c < len(puzzle)) && (r >= 0 && r < len(puzzle[0])) {
 				found += string(puzzle[c][r])
 			} else {
 				break
