@@ -17,9 +17,9 @@ const (
 
 const (
 	UP = iota
+	RIGHT
 	DOWN
 	LEFT
-	RIGHT
 )
 
 // USE the const UP DOWN LEFT RIGHT to access DIR value
@@ -90,57 +90,52 @@ func findGuard(grid [][]rune) ([2]int, int) {
 	return [2]int{}, -1
 }
 
+type Pos struct {
+	Row int
+	Col int
+	Dir int
+}
+
 // Moves the guard on the grid until it leaves the grid bounds
-func (g *Grid) StartPatrol(maxSteps int) (isInfinite bool) {
+func (g *Grid) StartPatrol(maxSteps int) (bool, map[Pos]bool) {
 	currentSteps := 0
-	// prevs := make(map[[2]int][]int, 0)
-	// initDir := g.guard.Dir()
-	// initPos := g.guard.Pos()
-	// prevs[initPos] = append(prevs[initPos], initDir)
+	prevs := make(map[Pos]bool, 0)
 	// While the guard is in bounds:
 	for g.isPosInBound(g.guard.Pos()) {
 		// Record the last dir and pos
 		prevGuardPos := g.guard.Pos()
 		prevGuardDir := g.guard.Dir()
+		if currentSteps != 0 {
+			prevs[Pos{Row: prevGuardPos[0], Col: prevGuardPos[1], Dir: prevGuardDir}] = true
+		}
 		supposedNextPos := g.guard.NextPos(prevGuardDir)
 		if !g.isPosInBound(supposedNextPos) {
 			g.grid[prevGuardPos[0]][prevGuardPos[1]] = SeenGlyph(prevGuardDir, g.guard.Dir())
 			break
 		}
 		nextTile := g.grid[supposedNextPos[0]][supposedNextPos[1]]
-		switch nextTile {
-		case OBSTACLE, VORTEX:
+		for nextTile == OBSTACLE || nextTile == VORTEX {
 			// Change the guard direction
 			g.guard.ChangeDir()
+			supposedNextPos = g.guard.NextPos(g.guard.Dir())
+			nextTile = g.grid[supposedNextPos[0]][supposedNextPos[1]]
 		}
 		// Mark the current tile with the right SEEN glyph
 		g.grid[prevGuardPos[0]][prevGuardPos[1]] = SeenGlyph(prevGuardDir, g.guard.Dir())
+
 		// Move the guard position to the next tile
 		g.guard.Move()
 		nextPos := g.guard.Pos()
 
 		// Show the guard on the grid
-		g.grid[nextPos[0]][nextPos[1]] = DIR[prevGuardDir]
+		g.grid[nextPos[0]][nextPos[1]] = DIR[g.guard.Dir()]
+
 		currentSteps++
 		if currentSteps >= maxSteps && maxSteps != -1 {
-			return true
+			return true, prevs
 		}
-		// if maxSteps != -1 {
-		// 	currDir := g.guard.Dir()
-		// 	currPos := g.guard.Pos()
-		// 	dirs, visited := prevs[currPos]
-		// 	if visited {
-		// 		for _, dir := range dirs {
-		// 			if dir == currDir {
-		// 				return true
-		// 			}
-		// 		}
-		// 	}
-		// 	prevs[currPos] = append(prevs[currPos], currDir)
-		// }
-
 	}
-	return false
+	return false, prevs
 }
 
 // Moves the guard on the grid until it leaves the map, but there's a catch
@@ -151,74 +146,25 @@ func (g *Grid) StartPatrol(maxSteps int) (isInfinite bool) {
 // we are diverting the guard back on its previous tracks, and it should in theory results
 // in the guard being stuck in an infinite loop, it cannot leave the grid anymore
 // We will want to record the number of different box positions that gets the guard stuck in a loop.
-func (g *Grid) StartEvilPatrol() int {
-	// startPos := g.guard.Pos()
-	knownVortexPos := make(map[[2]int]bool, 0)
-	evilVortex := 0
-	// While the guard is in bounds:
-	for g.isPosInBound(g.guard.Pos()) {
-		// Record the last dir and pos
-		prevGuardPos := g.guard.Pos()
-		prevGuardDir := g.guard.Dir()
-		supposedNextPos := g.guard.NextPos(prevGuardDir)
-		if !g.isPosInBound(supposedNextPos) {
-			g.grid[prevGuardPos[0]][prevGuardPos[1]] = SeenGlyph(prevGuardDir, g.guard.Dir())
-			break
-		}
-		nextTile := g.grid[supposedNextPos[0]][supposedNextPos[1]]
-		switch nextTile {
-		case OBSTACLE, VORTEX:
-			g.guard.ChangeDir()
-		}
-
-		// Mark the current tile with the right SEEN glyph
-		g.grid[prevGuardPos[0]][prevGuardPos[1]] = SeenGlyph(prevGuardDir, g.guard.Dir())
-		// Move the guard position to the next tile
-		g.guard.Move()
-
-		nextPos := g.guard.Pos()
-		// Show the guard on the grid
-		g.grid[nextPos[0]][nextPos[1]] = DIR[g.guard.Dir()]
-
-		// Try to get the guard stuck
-		// Check if newTile with newDir is SEEN and if it's the right direction
-		newDir := g.guard.NextDir()
-		newPos := g.guard.NextPos(newDir)
-		newTile := g.grid[newPos[0]][newPos[1]]
-		supposedNextPos = g.guard.NextPos(g.guard.Dir())
-		if !g.isPosInBound(supposedNextPos) {
+func (g *Grid) StartEvilPatrol(seen map[Pos]bool) int {
+	count := 0
+	prevVortex := make(map[[2]int]bool, 0)
+	for saw, _ := range seen {
+		_, prevV := prevVortex[[2]int{saw.Row, saw.Col}]
+		if prevV {
 			continue
 		}
-		supposedNextTile := g.grid[supposedNextPos[0]][supposedNextPos[1]]
-		beEvil := false
-		if newTile != OBSTACLE && supposedNextTile != OBSTACLE {
-			// if !reflect.DeepEqual(newPos, startPos) {
-			// 	beEvil = true
-			// }
-			beEvil = true
-		}
-		if beEvil {
-			// Spawn the vortex in front of the guard in a copy of the grid
-			gridCopy := utils.DeepCopyMatrix(g.grid)
-			vortexPos := g.guard.NextPos(g.guard.Dir())
-			if !g.isPosInBound(vortexPos) {
-				continue
-			}
-			// is the vortex pos is already known?
-			_, alreadyKnown := knownVortexPos[vortexPos]
-			if alreadyKnown {
-				continue
-			}
-			gridCopy[vortexPos[0]][vortexPos[1]] = VORTEX
-			evilGrid := NewGrid(gridCopy)
-			isInfinite := evilGrid.StartPatrol(7000)
-			if isInfinite {
-				evilVortex++
-				// fmt.Printf("Infinite loop detected with maze:\n%s\n", evilGrid.PrintMaze())
-			}
+		prevVortex[[2]int{saw.Row, saw.Col}] = true
+		gc := utils.DeepCopyMatrix(g.grid)
+		ng := NewGrid(gc)
+		ng.grid[saw.Row][saw.Col] = VORTEX
+
+		infinite, _ := ng.StartPatrol(25000)
+		if infinite {
+			count++
 		}
 	}
-	return evilVortex
+	return count
 }
 
 func (g *Grid) isPosInBound(pos [2]int) bool {

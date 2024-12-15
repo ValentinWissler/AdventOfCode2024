@@ -17,20 +17,11 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-	maze := utils.ConvertInput(content)
-	// niceGrid := g.NewGrid(maze)
+	niceGrid := g.NewGrid(utils.ConvertInput(content))
+	_, seen := niceGrid.StartPatrol(-1)
+	evilGrid := g.NewGrid(utils.ConvertInput(content))
+	evil := evilGrid.StartEvilPatrol(seen)
 
-	count := 0
-	evilGrids := utils.FindAllGrids(maze)
-	for _, grid := range evilGrids {
-		ng := g.NewGrid(grid)
-		isInfinite := ng.StartPatrol(7000)
-		if isInfinite {
-			count++
-		}
-	}
-	// fmt.Println(count)
-
-	// niceGrid.StartPatrol(-1)
-	// fmt.Printf("The guard visited %d unique tiles on the nice grid\n", niceGrid.CountVisitedTiles())
+	fmt.Printf("The guard visited %d unique tiles on the nice grid\n", niceGrid.CountVisitedTiles())
+	fmt.Printf("The guard can be trapped with a new obstacle on %d unique tiles on the evil grid\n", evil)
 }

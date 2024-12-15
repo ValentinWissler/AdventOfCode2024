@@ -4,9 +4,9 @@ import "fmt"
 
 const (
 	UP = iota
+	RIGHT
 	DOWN
 	LEFT
-	RIGHT
 )
 
 // Directions the guard can move towards
@@ -45,34 +45,12 @@ func (g *Guard) Move() {
 
 // A guard can change direction if facing an obstacle
 func (g *Guard) ChangeDir() {
-	switch g.dir {
-	case UP:
-		g.dir = RIGHT
-	case DOWN:
-		g.dir = LEFT
-	case LEFT:
-		g.dir = UP
-	case RIGHT:
-		g.dir = DOWN
-	default:
-		panic(fmt.Sprintf("unknown directions: %d", g.dir))
-	}
+	g.dir = (g.dir + 1) % 4
 }
 
 // Return the next dir should the guard change direction
 func (g *Guard) NextDir() int {
-	switch g.dir {
-	case UP:
-		return RIGHT
-	case DOWN:
-		return LEFT
-	case LEFT:
-		return UP
-	case RIGHT:
-		return DOWN
-	default:
-		panic(fmt.Sprintf("unknown directions: %d", g.dir))
-	}
+	return (g.dir + 1) % 4
 }
 
 // Get Guard position
