@@ -11,7 +11,6 @@ type Pos struct {
 
 const (
 	TEST_FILE  = "../inputs/mini.txt"
-	TEST2_FILE = "../inputs/minii.txt"
 	INPUT_FILE = "../inputs/input.txt"
 	PINK       = "\033[35m"
 	DEFAULT    = "\033[0m"
@@ -38,12 +37,12 @@ func main() {
 	visited := make(map[Exp][2]int)
 	sum := 0
 	for _, v := range inp {
-		cm := ClawMachine{ax: v[0], ay: v[1], bx: v[2], by: v[3], cx: v[4] + 10000000000000, cy: v[5] + 10000000000000}
-		fewestTokens := 10000000000000
+		cm := ClawMachine{ax: v[0] * 1_000_000, ay: v[1] * 1_000_000, bx: v[2] * 1_000_000, by: v[3] * 1_000_000, cx: v[4] + 10_000_000_000_000, cy: v[5] + 10_000_000_000_000}
+		fewestTokens := 10_000_000_000_000
 		// Test all A combos
-		for i := 10000000000; i >= 0; i-- {
+		for i := 1_000_000; i >= 0; i-- {
 			// Test all B combos
-			for j := 0; j <= 10000000000; j++ {
+			for j := 0; j <= 1_000_000; j++ {
 				nx, ny := 0, 0
 				v, ok := visited[Exp{cm.ax, cm.ay, cm.bx, cm.by, i, j}]
 				if ok {
@@ -60,7 +59,7 @@ func main() {
 				}
 			}
 		}
-		if fewestTokens != 10000000000000 {
+		if fewestTokens != 10_000_000_000_000 {
 			fmt.Printf("Fewest token to reach the target: %s%d%s\n", PINK, fewestTokens, DEFAULT)
 			sum += fewestTokens
 		}
