@@ -13,7 +13,7 @@ const (
 )
 
 func main() {
-	in, err := utils.ReadFile(TEST_FILE)
+	in, err := utils.ReadFile(INPUT_FILE)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -25,10 +25,10 @@ func main() {
 	sum := grid.ProcessCommands()
 	fmt.Printf("The sum of gps coordinates is %d\n", sum)
 
-	// Part 2
-	gridInput2 := utils.EnlargeGrid(in)
-	grid2 := g.NewGrid(gridInput2, commsInput)
-	fmt.Println(grid2.String())
-	sum2 := grid2.ProcessCommandsV2()
-	fmt.Printf("The sum of gps coordinates is %d\n", sum2)
+	// // Part 2
+	// gridInput2 := utils.EnlargeGrid(in)
+	// grid2 := g.NewGrid(gridInput2, commsInput)
+	// fmt.Println(grid2.String())
+	// sum2 := grid2.ProcessCommandsV2()
+	// fmt.Printf("The sum of gps coordinates is %d\n", sum2)
 }
