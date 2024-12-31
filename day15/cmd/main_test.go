@@ -15,11 +15,17 @@ func TestMaze(t *testing.T) {
 		fmt.Println(err.Error())
 		return
 	}
-	gridInput, commsInput := utils.ConvertInput(in)
-	fmt.Printf("This is the grid\n%v\n", gridInput)
-	fmt.Printf("This is the commands\n%v\n", commsInput)
 
+	// Part 1
+	gridInput, commsInput := utils.ConvertInput(in)
 	grid := g.NewGrid(gridInput, commsInput)
 	sum := grid.ProcessCommands()
 	fmt.Printf("The sum of gps coordinates is %d\n", sum)
+
+	// Part 2
+	gridInput2 := utils.EnlargeGrid(in)
+	grid2 := g.NewGrid(gridInput2, commsInput)
+	// fmt.Println(grid2.String())
+	sum2 := grid2.ProcessCommandsV2()
+	fmt.Printf("The sum of gps coordinates is %d\n", sum2)
 }

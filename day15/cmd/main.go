@@ -25,10 +25,10 @@ func main() {
 	sum := grid.ProcessCommands()
 	fmt.Printf("The sum of gps coordinates is %d\n", sum)
 
-	// // Part 2
-	// gridInput2 := utils.EnlargeGrid(in)
-	// grid2 := g.NewGrid(gridInput2, commsInput)
+	// Part 2
+	gridInput2 := utils.EnlargeGrid(in)
+	grid2 := g.NewGrid(gridInput2, commsInput)
 	// fmt.Println(grid2.String())
-	// sum2 := grid2.ProcessCommandsV2()
-	// fmt.Printf("The sum of gps coordinates is %d\n", sum2)
+	sum2 := grid2.ProcessCommandsV2()
+	fmt.Printf("The sum of gps coordinates is %d\n", sum2)
 }
