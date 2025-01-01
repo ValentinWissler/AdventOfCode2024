@@ -1,16 +1,16 @@
 package main
 
 import (
-	g "aoc16/guard"
+	g "aoc16/grid"
 	"aoc16/utils"
 	"fmt"
+	"sort"
 )
 
 const (
 	TEST_FILE  = "../inputs/mini.txt"
+	TEST2_FILE = "../inputs/minii.txt"
 	INPUT_FILE = "../inputs/input.txt"
-	MAXX       = 103
-	MAXV       = 101
 )
 
 func main() {
@@ -19,24 +19,12 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-	input := utils.IngestInput(in)
-	// for _, v := range input {
-	// 	fmt.Println(v)
-	// }
-	sum := 0
-	midX, midY := (MAXX+1)/2, (MAXV+1)/2
-	for _, grd := range input {
-		guard := g.Newguard(g.Pos{X: grd[0], Y: grd[1]}, g.Pos{X: grd[2], Y: grd[3]}, MAXX, MAXV)
-		for x := 0; x < 100; x++ {
-			guard.Move()
-		}
-		// if the guard is not in the middle y or middle x, count it
-		if guard.Pos().X != midX && guard.Pos().Y != midY {
-			sum++
-		}
-	}
-	fmt.Println(sum)
-	// grid := grid.NewGrid(input)
-	// grid.FindAntenas()
-
+	input := utils.FormatInput(in)
+	grid := g.NewGrid(input)
+	// fmt.Print(grid.Print())
+	scores := grid.FindPath(g.NewNode(grid.GetStart()), make(map[g.Pos]bool), g.RIGHT, 0)
+	sort.Slice(scores, func(i, j int) bool {
+		return scores[i] < scores[j]
+	})
+	fmt.Printf("The smallest score returned is\n%d\n", scores[0])
 }
